@@ -19,4 +19,22 @@ public class EmployeeDAOImpl implements EmployeeDAO{
     public List<Employee> findAll() {
         return entityManager.createQuery("from Employee ",Employee.class).getResultList();
     }
+
+    @Override
+    public Employee findEmployeeById(int id) {
+        Employee employee = entityManager.find(Employee.class, id);
+        return employee;
+    }
+
+    @Override
+    public Employee save(Employee employees) {
+        Employee newEmployee = entityManager.merge(employees);
+        return newEmployee;
+    }
+
+    @Override
+    public void deleteEmployeeById(int id) {
+        Employee employee = entityManager.find(Employee.class, id);
+        entityManager.remove(employee);
+    }
 }
