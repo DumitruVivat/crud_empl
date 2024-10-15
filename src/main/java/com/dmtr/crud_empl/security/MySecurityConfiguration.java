@@ -6,36 +6,28 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class MySecurityConfiguration {
 
     @Bean
-    public InMemoryUserDetailsManager userDetailsManager() {
+    public UserDetailsManager userDetailsManager(DataSource dataSource) {
+        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
 
-        UserDetails user1 = User.builder()
-                .username("Ivan")
-                .password("{noop}test123")
-                .roles("EMPLOYEE")
-                .build();
+        jdbcUserDetailsManager.setUsersByUsernameQuery(
+                "select user_id, pw, active from members where user_id=?"
+        );
 
-        UserDetails user2 = User.builder()
-                .username("Oleg")
-                .password("{noop}test123")
-                .roles("EMPLOYEE", "MANAGER")
-                .build();
+        jdbcUserDetailsManager.setUsersByUsernameQuery(
+                "select user_id, role from roles where user_id=?"
+        );
 
-        UserDetails user3 = User.builder()
-                .username("Ina")
-                .password("{noop}test123")
-                .roles("EMPLOYEE", "MANAGER","ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(user1, user2, user3);
+        return jdbcUserDetailsManager;
     }
 
     @Bean
@@ -52,4 +44,29 @@ public class MySecurityConfiguration {
 
         return http.build();
     }
+
+
+    //    @Bean
+//    public InMemoryUserDetailsManager userDetailsManager() {
+//
+//        UserDetails user1 = User.builder()
+//                .username("Ivan")
+//                .password("{noop}test123")
+//                .roles("EMPLOYEE")
+//                .build();
+//
+//        UserDetails user2 = User.builder()
+//                .username("Oleg")
+//                .password("{noop}test123")
+//                .roles("EMPLOYEE", "MANAGER")
+//                .build();
+//
+//        UserDetails user3 = User.builder()
+//                .username("Ina")
+//                .password("{noop}test123")
+//                .roles("EMPLOYEE", "MANAGER","ADMIN")
+//                .build();
+//
+//        return new InMemoryUserDetailsManager(user1, user2, user3);
+//    }
 }
